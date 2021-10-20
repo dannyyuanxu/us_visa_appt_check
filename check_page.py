@@ -77,7 +77,8 @@ while True:
         wait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, "//td[@data-handler='selectDay']"))).click()
     except:
         print("move to next page")
-        driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//div[@class='ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-right']//a[@class='ui-datepicker-next ui-corner-all']").click()
+        driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
+        # driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//div[@class='ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-right']//a[@class='ui-datepicker-next ui-corner-all']").click()
 
 # date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
 
