@@ -2,11 +2,12 @@
 
 #### set up
 import yaml
-from selenium import webdriver
+# from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import Chrome
+from selenium.webdriver.support.select import Select
 
 import os
 import dotenv
@@ -67,28 +68,38 @@ city_field.send_keys("Ottawa")
 avail_field = driver.find_element_by_id("appointments_consulate_appointment_date_input")
 avail_field.click()
 
+# click the earliest available date
+#TODO inspect the dates, save to offline doc and upload to online account
+while True:
+    try:
+        wait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, "//td[@data-handler='selectDay']"))).click()
+        break
+    except:
+        driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
+        # driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//div[@class='ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-right']//a[@class='ui-datepicker-next ui-corner-all']").click()
+
+# select the first available time slot
+#TODO inspect all options and select one that is closest to the preferred time slot(s)
+sel = Select(driver.find_element(By.ID,  "appointments_consulate_appointment_time"))
+sel.select_by_index (1)
+
+
+reschedule_button = driver.find_element_by_id("appointments_submit_action")
+reschedule_button.click()
 
 
 #### under development
 
-while True:
-    try:
-        print("start trying to click")
-        wait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, "//td[@data-handler='selectDay']"))).click()
-    except:
-        print("move to next page")
-        driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
-        # driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//div[@class='ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-right']//a[@class='ui-datepicker-next ui-corner-all']").click()
 
-# date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
+driver.find_element(By.XPATH,  "//a[@class='button alert']").click()
+
+reschedule_button.get_attribute("attribute name")
+
 
 # if len(date_list)>0:
 #     date_list[0].click()
 
 # date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
-
-
-
 
 
 
