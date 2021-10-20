@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver import Chrome
 
 import os
 import dotenv
@@ -19,7 +19,7 @@ with open('config.yaml') as file:
 
 login_site = config["reschedule_web"]
 
-# read in environment variable
+# read in environment variables
 dotenv.load_dotenv()
 login_username = os.getenv('USERNAME')
 login_password = os.getenv('PASSWORD')
@@ -28,7 +28,14 @@ login_password = os.getenv('PASSWORD')
 #### webpage operations
 
 # open a browser
-driver = webdriver.Chrome(ChromeDriverManager().install())
+driver = Chrome()
+
+# altenative way
+# from webdriver_manager.chrome import ChromeDriverManager
+# driver = webdriver.Chrome(ChromeDriverManager().install())
+
+
+
 # open page and log in
 driver.get(login_site)
 ok_to_login=driver.find_elements_by_xpath("//button[contains(string(), 'OK')]")[0]
@@ -68,7 +75,7 @@ while True:
     try:
         print("start trying to click")
         wait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, "//td[@data-handler='selectDay']"))).click()
-    except: 
+    except:
         print("move to next page")
         driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//div[@class='ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-right']//a[@class='ui-datepicker-next ui-corner-all']").click()
 
@@ -78,7 +85,6 @@ while True:
 #     date_list[0].click()
 
 # date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
-        
 
 
 
@@ -88,5 +94,6 @@ while True:
 
 
 
-# close down the session 
+
+# close down the session
 driver.close()
