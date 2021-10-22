@@ -1,6 +1,7 @@
 # this script opens up page and check available dates location
 
 #### set up
+import pandas as pd
 import yaml
 # from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -60,9 +61,9 @@ sign_in_button.click()
 # test out one city
 
 city_list = ['Ottawa','Calgary','Vancouver','Halifax','Montreal','Quebec City','Toronto']
-
+city_lkup = city_list[0]
 city_field = driver.find_element_by_name("appointments[consulate_appointment][facility_id]")
-city_field.send_keys("Ottawa")
+city_field.send_keys(city_lkup)
 
 
 avail_field = driver.find_element_by_id("appointments_consulate_appointment_date_input")
@@ -73,6 +74,7 @@ avail_field.click()
 while True:
     try:
         wait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, "//td[@data-handler='selectDay']"))).click()
+
         break
     except:
         driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
@@ -83,6 +85,7 @@ while True:
 sel = Select(driver.find_element(By.ID,  "appointments_consulate_appointment_time"))
 sel.select_by_index (1)
 
+sel.get_attribute("attribute name")
 
 reschedule_button = driver.find_element_by_id("appointments_submit_action")
 reschedule_button.click()
@@ -93,7 +96,7 @@ reschedule_button.click()
 
 driver.find_element(By.XPATH,  "//a[@class='button alert']").click()
 
-reschedule_button.get_attribute("attribute name")
+avail_field.get_attribute("class")
 
 
 # if len(date_list)>0:
@@ -101,10 +104,32 @@ reschedule_button.get_attribute("attribute name")
 
 # date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
 
+# check numerical record of the available dates
+
+test = driver.find_elements(By.XPATH,  "//td[@data-handler='selectDay']")
 
 
+avail_table = pd.DataFrame(columns = ['city', 'year', 'month', 'yrmth'])
+if len(test)>0:
+
+    for i in range(len(test)):
+        i_mth = test[i].get_attribute("data-month")
+        i_yr = test[i].get_attribute("data-year")
+        i_day = test[i].text
+        i_yrmth = i_yr+i_mth
+        avail_table = avail_table.append({'city' : city_lkup, 'year' : i_yr, 'month' : i_mth,'yrmth' : i_yrmth}, ignore_index = True)
+
+target_visa_appt_window = ['202201','202207']
 
 
+# test finding the text of days
+
+test = driver.find_elements(By.XPATH,  "//table[@class='ui-datepicker-calendar']")
+len(test)
+test[0].text
+
+
+driver.execute_script('var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;', test[0])
 
 
 # close down the session
