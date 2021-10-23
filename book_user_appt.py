@@ -30,12 +30,6 @@ user_profile_data_loc = config["user_profile_data_loc"]
 # read in the desired 
 user_list = pd.Series(os.listdir(user_profile_data_loc))
 user_list = list(user_list[~user_list.str.startswith('.')])
-user_list
-
-# # read in environment variables
-# dotenv.load_dotenv()
-# login_username = os.getenv('USERNAME')
-# login_password = os.getenv('PASSWORD')
 
 
 
@@ -44,10 +38,6 @@ user_list
 
 # open a browser
 driver = Chrome()
-
-# altenative way
-# from webdriver_manager.chrome import ChromeDriverManager
-# driver = webdriver.Chrome(ChromeDriverManager().install())
 
 # open page and log in
 driver.get(login_site)
@@ -112,12 +102,6 @@ driver.execute_script('var items = {}; for (index = 0; index < arguments[0].attr
 driver.find_element(By.XPATH,  "//a[@class='button alert']").click()
 
 avail_field.get_attribute("class")
-
-
-# if len(date_list)>0:
-#     date_list[0].click()
-
-# date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
 
 # check numerical record of the available dates
 
