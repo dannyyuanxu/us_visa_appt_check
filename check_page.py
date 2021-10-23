@@ -65,7 +65,7 @@ sign_in_button.click()
 
 
 
-for cycle in range(2):
+for cycle in range(3):
     # get all availability for specific country and visa type
 
     # by-individual input
@@ -75,10 +75,6 @@ for cycle in range(2):
     # time_stamp = str(datetime.datetime.now())
 
     # record all availability in a table
-
-    # city_field = driver.find_element_by_id("appointments_consulate_appointment_facility_id")
-    # avail_field = driver.find_element_by_id("appointments_consulate_appointment_date_input")        
-    
     avail_table = pd.DataFrame(columns = ['country','visa_type','city', 'year', 'month','day', 'yrmth'])
 
     for city_lkup in city_list:
@@ -102,12 +98,9 @@ for cycle in range(2):
                     i_yrmth = i_yr+i_mth
                     avail_table = avail_table.append({'country':country_lkup,'visa_type':visa_type_lkup,'city' : city_lkup, 'year' : i_yr, 'month' : i_mth,'day' : i_day, 'yrmth' : i_yrmth}, ignore_index = True)
             
-            # driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
-            # next_button = driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']")
             next_button = driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//a[@class='ui-datepicker-next ui-corner-all']")
             next_button.click()
             next_button = driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//a[@class='ui-datepicker-next ui-corner-all']")
-            # next_button = driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']")
             next_button.click()
             time.sleep(0.2+random.random()/10)
 
@@ -121,92 +114,7 @@ for cycle in range(2):
 
     avail_table.to_csv(f'{avail_data_loc}avail_table_{country_lkup}_{visa_type_lkup}_{str(datetime.datetime.now())}_cycle{cycle}.csv', index = False)
     
-    time.sleep(60+random.random()*100)
-
-# close down the session
-# driver.close()
-
-
-
-
-
-
-
-
-
-
-
-# click the earliest available date
-#TODO inspect the dates, save to offline doc and upload to online account
-while True:
-    try:
-        wait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, "//td[@data-handler='selectDay']"))).click()
-
-        break
-    except:
-        driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
-        # driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//div[@class='ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-right']//a[@class='ui-datepicker-next ui-corner-all']").click()
-
-# select the first available time slot
-#TODO inspect all options and select one that is closest to the preferred time slot(s)
-sel = Select(driver.find_element(By.XPATH,  "//li[@id='appointments_consulate_appointment_time_input'"))
-sel.select_by_index(1)
-# TODO the select by index(1) function fails when there are more than 1 choice
-
-
-sel.get_attribute("attribute name")
-
-reschedule_button = driver.find_element_by_id("appointments_submit_action")
-reschedule_button.click()
-
-
-#### under development
-
-
-# solve more than one available time selection
-
-test = driver.find_elements(By.ID,  "appointments_consulate_appointment_time")
-
-driver.execute_script('var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;', test[0])
-
-
-driver.find_element(By.XPATH,  "//a[@class='button alert']").click()
-
-avail_field.get_attribute("class")
-
-
-# if len(date_list)>0:
-#     date_list[0].click()
-
-# date_list = driver.find_elements(By.XPATH, '//table[@td class=" undefined"]')
-
-# check numerical record of the available dates
-
-test = driver.find_elements(By.XPATH,  "//td[@data-handler='selectDay']")
-
-
-avail_table = pd.DataFrame(columns = ['city', 'year', 'month', 'yrmth'])
-if len(test)>0:
-
-    for i in range(len(test)):
-        i_mth = test[i].get_attribute("data-month")
-        i_yr = test[i].get_attribute("data-year")
-        i_day = test[i].text
-        i_yrmth = i_yr+i_mth
-        avail_table = avail_table.append({'city' : city_lkup, 'year' : i_yr, 'month' : i_mth,'yrmth' : i_yrmth}, ignore_index = True)
-
-target_visa_appt_window = ['202201','202207']
-
-
-# test finding the text of days
-
-test = driver.find_elements(By.XPATH,  "//table[@class='ui-datepicker-calendar']")
-len(test)
-test[0].text
-
-
-driver.execute_script('var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;', test[0])
-
+    time.sleep(600+random.random()*60)
 
 # close down the session
 driver.close()
