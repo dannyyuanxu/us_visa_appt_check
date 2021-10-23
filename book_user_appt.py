@@ -27,14 +27,20 @@ login_site = config["reschedule_web"]
 avail_data_loc = config["avail_data_loc"]
 user_profile_data_loc = config["user_profile_data_loc"]
 
-# read in environment variables
-dotenv.load_dotenv()
-login_username = os.getenv('USERNAME')
-login_password = os.getenv('PASSWORD')
+# read in the desired 
+user_list = pd.Series(os.listdir(user_profile_data_loc))
+user_list = list(user_list[~user_list.str.startswith('.')])
+user_list
+
+# # read in environment variables
+# dotenv.load_dotenv()
+# login_username = os.getenv('USERNAME')
+# login_password = os.getenv('PASSWORD')
+
+
 
 
 #### webpage operations
-
 
 # open a browser
 driver = Chrome()
