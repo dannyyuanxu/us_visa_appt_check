@@ -35,13 +35,8 @@ login_password = os.getenv('PASSWORD')
 
 #### webpage operations
 
-
 # open a browser
 driver = Chrome()
-
-# altenative way
-# from webdriver_manager.chrome import ChromeDriverManager
-# driver = webdriver.Chrome(ChromeDriverManager().install())
 
 # open page and log in
 driver.get(login_site)
@@ -75,7 +70,7 @@ for cycle in range(3):
     # time_stamp = str(datetime.datetime.now())
 
     # record all availability in a table
-    avail_table = pd.DataFrame(columns = ['country','visa_type','city', 'year', 'month','day', 'yrmth'])
+    avail_table = pd.DataFrame(columns = ['country','visa_type','city', 'year', 'month','day', 'yrmthd'])
 
     for city_lkup in city_list:
         city_field = driver.find_element_by_id("appointments_consulate_appointment_facility_id")
@@ -95,8 +90,8 @@ for cycle in range(3):
                     i_mth = avail_dates[i].get_attribute("data-month")
                     i_yr = avail_dates[i].get_attribute("data-year")
                     i_day = avail_dates[i].text
-                    i_yrmth = i_yr+i_mth
-                    avail_table = avail_table.append({'country':country_lkup,'visa_type':visa_type_lkup,'city' : city_lkup, 'year' : i_yr, 'month' : i_mth,'day' : i_day, 'yrmth' : i_yrmth}, ignore_index = True)
+                    i_yrmthd = i_yr+i_mth+i_day
+                    avail_table = avail_table.append({'country':country_lkup,'visa_type':visa_type_lkup,'city' : city_lkup, 'year' : i_yr, 'month' : i_mth,'day' : i_day, 'yrmthd' : i_yrmth}, ignore_index = True)
             
             next_button = driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//a[@class='ui-datepicker-next ui-corner-all']")
             next_button.click()
