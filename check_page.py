@@ -3,7 +3,9 @@
 #### set up
 import pandas as pd
 import yaml
-# from selenium import webdriver
+import time
+import random
+import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,6 +22,8 @@ with open('config.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 login_site = config["reschedule_web"]
+avail_data_loc = config["avail_data_loc"]
+user_profile_data_loc = config["user_profile_data_loc"]
 
 # read in environment variables
 dotenv.load_dotenv()
@@ -29,45 +33,92 @@ login_password = os.getenv('PASSWORD')
 
 #### webpage operations
 
-# open a browser
-driver = Chrome()
-
-# altenative way
-# from webdriver_manager.chrome import ChromeDriverManager
-# driver = webdriver.Chrome(ChromeDriverManager().install())
 
 
+for cycle in range(24):
 
-# open page and log in
-driver.get(login_site)
-ok_to_login=driver.find_elements_by_xpath("//button[contains(string(), 'OK')]")[0]
-ok_to_login.click()
+    # open a browser
+    driver = Chrome()
 
+    # altenative way
+    # from webdriver_manager.chrome import ChromeDriverManager
+    # driver = webdriver.Chrome(ChromeDriverManager().install())
 
-username_field = driver.find_element_by_name("user[email]")
-username_field.clear()
-username_field.send_keys(login_username)
-
-password_field = driver.find_element_by_name("user[password]")
-password_field.clear()
-password_field.send_keys(login_password)
-
-policy_check = driver.find_element_by_xpath("//input[@name='policy_confirmed']")
-driver.execute_script("arguments[0].click();", policy_check)
-
-sign_in_button = driver.find_element_by_name("commit")
-sign_in_button.click()
-
-# test out one city
-
-city_list = ['Ottawa','Calgary','Vancouver','Halifax','Montreal','Quebec City','Toronto']
-city_lkup = city_list[0]
-city_field = driver.find_element_by_name("appointments[consulate_appointment][facility_id]")
-city_field.send_keys(city_lkup)
+    # open page and log in
+    driver.get(login_site)
+    ok_to_login=driver.find_elements_by_xpath("//button[contains(string(), 'OK')]")[0]
+    ok_to_login.click()
 
 
-avail_field = driver.find_element_by_id("appointments_consulate_appointment_date_input")
-avail_field.click()
+    username_field = driver.find_element_by_name("user[email]")
+    username_field.clear()
+    username_field.send_keys(login_username)
+
+    password_field = driver.find_element_by_name("user[password]")
+    password_field.clear()
+    password_field.send_keys(login_password)
+
+    policy_check = driver.find_element_by_xpath("//input[@name='policy_confirmed']")
+    driver.execute_script("arguments[0].click();", policy_check)
+
+    sign_in_button = driver.find_element_by_name("commit")
+    sign_in_button.click()
+
+    # get all availability for specific country and visa type
+
+    # by-individual input
+
+    country_lkup = 'Canada'
+    visa_type_lkup = 'H1b'
+    city_list = ['Ottawa','Calgary','Vancouver'] #,'Halifax','Montreal','Quebec City','Toronto']
+    # time_stamp = str(datetime.datetime.now())
+
+    # record all availability in a table
+
+
+    avail_table = pd.DataFrame(columns = ['country','visa_type','city', 'year', 'month','day', 'yrmth'])
+
+    for city_lkup in city_list:
+        city_field = driver.find_element_by_name("appointments[consulate_appointment][facility_id]")
+        city_field.click()
+        city_field.send_keys(city_lkup)
+
+        avail_field = driver.find_element_by_id("appointments_consulate_appointment_date_input")
+        avail_field.click()
+
+        # get the all available dates in the next 24 months and write into a table
+        for m in range (24):
+            
+            avail_dates = driver.find_elements(By.XPATH,  "//td[@data-handler='selectDay']")
+
+            if len(avail_dates)>0:
+
+                for i in range(len(avail_dates)):
+                    i_mth = avail_dates[i].get_attribute("data-month")
+                    i_yr = avail_dates[i].get_attribute("data-year")
+                    i_day = avail_dates[i].text
+                    i_yrmth = i_yr+i_mth
+                    avail_table = avail_table.append({'country':country_lkup,'visa_type':visa_type_lkup,'city' : city_lkup, 'year' : i_yr, 'month' : i_mth,'day' : i_day, 'yrmth' : i_yrmth}, ignore_index = True)
+            
+            driver.find_element(By.XPATH,  "//div[@class='ui-datepicker-group ui-datepicker-group-last']//span[@class='ui-icon ui-icon-circle-triangle-e']").click()
+            time.sleep(0.2+random.random()/10)
+
+    avail_table.to_csv(f'{avail_data_loc}avail_table_{country_lkup}_{visa_type_lkup}_{str(datetime.datetime.now())}_cycle{cycle}.csv', index = False)
+
+    time.sleep(3600+random.random()*100)
+
+    # close down the session
+    driver.close()
+
+
+
+
+
+
+
+
+
+
 
 # click the earliest available date
 #TODO inspect the dates, save to offline doc and upload to online account
@@ -82,8 +133,10 @@ while True:
 
 # select the first available time slot
 #TODO inspect all options and select one that is closest to the preferred time slot(s)
-sel = Select(driver.find_element(By.ID,  "appointments_consulate_appointment_time"))
-sel.select_by_index (1)
+sel = Select(driver.find_element(By.XPATH,  "//li[@id='appointments_consulate_appointment_time_input'"))
+sel.select_by_index(1)
+# TODO the select by index(1) function fails when there are more than 1 choice
+
 
 sel.get_attribute("attribute name")
 
@@ -92,6 +145,13 @@ reschedule_button.click()
 
 
 #### under development
+
+
+# solve more than one available time selection
+
+test = driver.find_elements(By.ID,  "appointments_consulate_appointment_time")
+
+driver.execute_script('var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;', test[0])
 
 
 driver.find_element(By.XPATH,  "//a[@class='button alert']").click()
