@@ -1,4 +1,5 @@
-# this script opens up page and check available dates location
+# this script matches user demand with the available dates, book new appt when appropriate
+
 
 #### set up
 import pandas as pd
@@ -23,7 +24,6 @@ with open('config.yaml') as file:
     # scalar values to Python the dictionary format
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-login_site = config["reschedule_web"]
 avail_data_loc = config["avail_data_loc"]
 user_profile_data_loc = config["user_profile_data_loc"]
 
@@ -31,8 +31,12 @@ user_profile_data_loc = config["user_profile_data_loc"]
 user_list = pd.Series(os.listdir(user_profile_data_loc))
 user_list = list(user_list[~user_list.str.startswith('.')])
 
-
-
+if config["profile_from"]=="excel_file":
+    pass
+elif config["profile_from"]=="env":
+    dotenv.load_dotenv()
+    login_username = os.getenv('USERNAME')
+    login_password = os.getenv('PASSWORD')
 
 #### webpage operations
 

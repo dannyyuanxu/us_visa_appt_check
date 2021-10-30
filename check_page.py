@@ -75,8 +75,8 @@ def record_city(avail_table,city_lkup,country_lkup,visa_type_lkup):
 
             for i in range(len(avail_dates)):
                 i_mth = avail_dates[i].get_attribute("data-month")
-                if i_mth == 0:
-                    i_mth = 1 # reassign month value to handle 2023 mis-month number in html
+                if str(i_mth) == "0":
+                    i_mth = "1" # reassign month value to handle 2023 mis-month number in html
                 i_yr = avail_dates[i].get_attribute("data-year")
                 i_day = avail_dates[i].text
                 i_yrmthd = f"{i_yr}/{i_mth}/{i_day}"
@@ -104,7 +104,7 @@ for cycle in range(10):
     # by-individual input
     country_lkup = 'Canada'
     visa_type_lkup = 'H1b'
-    city_list = ['Calgary','Vancouver','Ottawa']#,'Halifax','Montreal','Quebec City','Toronto']
+    city_list = ['Calgary','Vancouver','Ottawa','Halifax','Montreal','Quebec City','Toronto']
     # time_stamp = str(datetime.datetime.now())
 
     # record all availability in a table
@@ -128,7 +128,7 @@ for cycle in range(10):
             print(f"{city_lkup} not available, test the next city")
             pass
     
-    # save updated available table
+    # save updated available date table only when there are updates
     if avail_table.equals(avail_table_last) == False: 
         avail_table.to_csv(f'{avail_data_loc}avail_table_{country_lkup}_{visa_type_lkup}_{str(datetime.datetime.now())}_cycle{cycle}.csv', index = False)
         print(f"observed changes in available dates in {country_lkup}")
