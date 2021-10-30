@@ -1,0 +1,14 @@
+# config 
+
+# profile reading mode
+profile_from: excel_file # excel_file or "env" for environment variables
+
+# web addresses
+login_site: https://ais.usvisa-info.com/en-ca/niv/users/sign_in
+reschedule_web: https://ais.usvisa-info.com/en-ca/niv/schedule/35389278/appointment
+
+# data loation
+avail_data_loc: /Volumes/Transcend/us_visa_appt_data_storage/avail/
+user_profile_data_loc: /Volumes/Transcend/us_visa_appt_data_storage/user_profile/
+
+
