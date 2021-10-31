@@ -3,6 +3,7 @@
 
 #### set up
 import pandas as pd
+import numpy as np
 import yaml
 import time
 import random
@@ -27,16 +28,89 @@ with open("config.yaml") as file:
 avail_data_loc = config["avail_data_loc"]
 user_profile_data_loc = config["user_profile_data_loc"]
 
-# read in the desired
+# read in the desired user profiles
 user_list = pd.Series(os.listdir(user_profile_data_loc))
-user_list = list(user_list[~user_list.str.startswith(".")])
 
-if config["profile_from"] == "excel_file":
-    pass
-elif config["profile_from"] == "env":
-    dotenv.load_dotenv()
-    login_username = os.getenv("USERNAME")
-    login_password = os.getenv("PASSWORD")
+user_list = list(user_list[[c[0].isdigit() for c in user_list]])
+
+# read in first one user 
+usr_priority = float(user_list[0].split("_")[0])
+usr_file = pd.ExcelFile(user_profile_data_loc+user_list[0])
+account_info = pd.read_excel(usr_file, 'account_info')
+pref_dates = pd.read_excel(usr_file, 'pref_dates')
+
+login_username = account_info["username"][0]
+login_password = account_info["password"][0]
+reschedule_link = account_info["reschedule_link"][0]
+n_time_change = account_info["n_time_change"][0]
+
+# process user info
+email_front = login_username.split('@')[0]
+pref_dates_all = pref_dates.rename({'pref_appt_dt':f'pref_appt_dt_{email_front}_{usr_priority}'},axis =1)
+
+# read in all other users
+
+for u in range(len(user_list)-1):
+    usr_priority = float(user_list[u+1].split("_")[0])
+    usr_file = pd.ExcelFile(user_profile_data_loc+user_list[u+1])
+    account_info = pd.read_excel(usr_file, 'account_info')
+    pref_dates = pd.read_excel(usr_file, 'pref_dates')
+
+    login_username = account_info["username"][0]
+    login_password = account_info["password"][0]
+    reschedule_link = account_info["reschedule_link"][0]
+    n_time_change = account_info["n_time_change"][0]
+
+    # process user info
+    email_front = login_username.split('@')[0]
+    pref_dates = pref_dates.rename({'pref_appt_dt':f'pref_appt_dt_{email_front}_{usr_priority}'},axis =1)
+    pref_dates = pref_dates[['date',f'pref_appt_dt_{email_front}_{usr_priority}']]
+
+    # merge with the first user pref table
+    pref_dates_all = pd.merge(
+        pref_dates_all,
+        pref_dates,
+        on='date',
+        how='left'
+    )
+
+# get the preferred date
+all_user_pref_cols = pref_dates_all.columns[pref_dates_all.columns.str.startswith("pref_appt")]
+pref_dates_all['need_dates'] = np.sum(pref_dates_all[all_user_pref_cols],axis =1)
+pref_dates_needed = pref_dates_all[pref_dates_all['need_dates']>0].drop(['year','month','day','day_of_week'],axis=1)
+
+# all desired dates
+set(pref_dates_needed['date'])
+
+# TODO change to multiple visa types
+
+# read in the desired user profiles
+avail_list = list(os.listdir(avail_data_loc))
+
+
+avail_latest_file = max(avail_list)
+avail_latest = pd.read_csv(f"{avail_data_loc}{avail_latest_file}")
+avail_latest['date'] = pd.to_datetime(avail_latest['yrmthd'])
+
+# availability and user demand intersection
+
+# TODO match on the city as well beyong just dates 
+avail_demand = pd.merge(
+    avail_latest,
+    pref_dates_needed,
+    on = 'date',
+    how='inner'
+)
+
+# take out users with no match
+keey_user_cols = avail_demand[avail_demand.columns[avail_demand.columns.str.startswith("pref_appt")]].sum()==0
+avail_demand = avail_demand.drop(list(keey_user_cols.index[keey_user_cols]), axis =1)
+
+# export the user info and target date
+# output: login_username, login_password, date
+
+
+
 
 #### webpage operations
 
@@ -64,8 +138,7 @@ sign_in_button = driver.find_element_by_name("commit")
 sign_in_button.click()
 
 
-# click the earliest available date
-# TODO inspect the dates, save to offline doc and upload to online account
+# click the desired date and book
 while True:
     try:
         wait(driver, 1).until(
@@ -113,8 +186,6 @@ driver.execute_script(
 
 
 driver.find_element(By.XPATH, "//a[@class='button alert']").click()
-
-avail_field.get_attribute("class")
 
 # check numerical record of the available dates
 
@@ -203,3 +274,4 @@ driver.execute_script(
 
 # # close down the session
 # driver.close()
+lo0
