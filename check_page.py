@@ -119,6 +119,11 @@ def record_city(avail_table, city_lkup, country_lkup, visa_type_lkup):
     return avail_table
 
 
+avail_table_last = pd.DataFrame(
+    columns=["country", "visa_type", "city", "year", "month", "day", "yrmthd"]
+)
+
+# TODO change termination logic: time or cycle
 for cycle in range(10):
     # get all availability for specific country and visa type
 
@@ -138,9 +143,6 @@ for cycle in range(10):
 
     # record all availability in a table
     avail_table = pd.DataFrame(
-        columns=["country", "visa_type", "city", "year", "month", "day", "yrmthd"]
-    )
-    avail_table_last = pd.DataFrame(
         columns=["country", "visa_type", "city", "year", "month", "day", "yrmthd"]
     )
 
@@ -175,6 +177,7 @@ for cycle in range(10):
 
     webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
     time.sleep(60 + random.random() * 10)
+    # driver.refresh()
 
 # close down the session
 driver.close()
